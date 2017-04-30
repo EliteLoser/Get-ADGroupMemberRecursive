@@ -131,4 +131,8 @@ VERBOSE: [CN=testuser0001,OU=TestUsers,OU=TestOU,DC=whatever,DC=local] Processin
 VERBOSE: [CN=testuser0001,OU=TestUsers,OU=TestOU,DC=whatever,DC=local] Adding non-group element to CN=TestGroupE,OU=Groups,OU=TestOU,DC=whatever,DC=local array.
 VERBOSE: [CN=testuser0002,OU=TestUsers,OU=TestOU,DC=whatever,DC=local] Processing ...
 VERBOSE: [CN=testuser0002,OU=TestUsers,OU=TestOU,DC=whatever,DC=local] Adding non-group element to CN=TestGroupE,OU=Groups,OU=TestOU,DC=whatever,DC=local array.
+
+..... output here unless you export/redirect/suppress or assign to a variable .....
+
+VERBOSE: Exporting main data hash to $Global:STGroupHashTemp.
 ```
