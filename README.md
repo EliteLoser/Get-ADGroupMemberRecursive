@@ -38,7 +38,7 @@ DisplayName         :
 DirectParentGroupDN : CN=TestGroupB,OU=Groups,OU=TestOU,DC=whatever,DC=local
 ```
 
-Example with nested groups.
+Example with nested groups. Play with Select-Object and Sort-Object -Unique, etc.
 
 ```powershell
 PS C:\temp> Get-ADGroupMemberRecursive -Identity TestGroupA
