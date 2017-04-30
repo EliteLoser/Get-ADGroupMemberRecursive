@@ -2,6 +2,8 @@
 Get AD group members recursively, tagged with root group DN and direct parent group DN.
 Not completely polished, but most of the basics are here.
 
+The code uses Microsoft's AD cmdlets.
+
 ```powershell
 PS C:\temp> Get-ADGroup 'TestGroupB' | Get-ADGroupMemberRecursive
 
