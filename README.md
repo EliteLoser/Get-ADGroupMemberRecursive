@@ -8,7 +8,7 @@ With multiple groups, you need to use something like $Groups | ForEach-Object { 
 
 You can actually _pipe_ multiple groups to the function (the -Identity parameter takes only a single group/string), but when doing that you cannot trust the "RootGroupDN" as it will always be set to the very last group you piped in, for all the entries. All other info is accurate, though, for all the objects, such as "DirectParentGroupDN". I'll see if I can work around this. It seems a bit odd how I'm having to do it.
 
-```powershell
+```
 PS C:\temp> Get-ADGroup 'TestGroupB' | Get-ADGroupMemberRecursive
 
 RootGroupDN         : CN=TestGroupB,OU=Groups,OU=TestOU,DC=whatever,DC=local
@@ -50,7 +50,7 @@ Screenshot example. Showing TestGroupA and that an infinite loop is avoided.
 
 Example with nested groups. Play with Select-Object and Sort-Object -Unique, etc.
 
-```powershell
+```
 PS C:\temp> Get-ADGroupMemberRecursive -Identity TestGroupA
 
 
@@ -113,7 +113,7 @@ DirectParentGroupDN : CN=TestGroupC,OU=Groups,OU=TestOU,DC=whatever,DC=local
 
 Verbose output for the same example as above.
 
-```powershell
+```
 PS C:\temp> Get-ADGroup 'TestGroupA' | Get-ADGroupMemberRecursive -Verbose
 VERBOSE: [CN=testuser0100,OU=TestUsers,OU=TestOU,DC=whatever,DC=local] Processing ...
 VERBOSE: [CN=testuser0100,OU=TestUsers,OU=TestOU,DC=whatever,DC=local] Adding non-group element to CN=TestGroupA,OU=Groups,OU=TestOU,DC=whatever,DC=local array.
