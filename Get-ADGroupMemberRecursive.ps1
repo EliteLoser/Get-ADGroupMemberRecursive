@@ -53,7 +53,7 @@ function Get-ADGroupMemberRecursive {
     }
     end {
         $Groups.Values | ForEach-Object {
-            $_ | Select-Object -Property @{ Name = "RootGroupDN"; Expression = { $GrandParentDN } }, *
+            $_ | Select-Object -Property *, @{ Name = "RootGroupDN"; Expression = { $GrandParentDN } }
         }
         ## DEBUG ##
         Write-Verbose -Message "Exporting main data hash to `$Global:STGroupHashTemp."
