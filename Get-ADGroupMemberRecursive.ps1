@@ -1,4 +1,4 @@
-﻿#requires -version 3
+#requires -version 3
 function Get-ADGroupMemberRecursive {
     [CmdletBinding()]
     param(
@@ -43,9 +43,11 @@ function Get-ADGroupMemberRecursive {
         }
     }
     process {
-        if (-not ($GrandParentDN = (Get-ADGroup $_ -ErrorAction SilentlyContinue).DistinguishedName)) {
-            Write-Error -Message "[$_] Supplied identity is not a group." -ErrorAction Stop
-            return # acts as a continue in foreach loops?
+        if (Get-Variable -Name Identity -ErrorAction SilentlyContinue) {
+            $GrandParentDN = (Get-ADGroup $Identity -ErrorAction SilentlyContinue).DistinguishedName
+        }
+        elseif ($_) {
+            $GrandParentDN = (Get-ADGroup $_ -ErrorAction SilentlyContinue).DistinguishedName
         }
         $Groups[$GrandParentDN] = @()
         Get-ADGroupMemberInternal -Identity $GrandParentDN
