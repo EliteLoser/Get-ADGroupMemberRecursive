@@ -38,6 +38,10 @@ DisplayName         :
 DirectParentGroupDN : CN=TestGroupB,OU=Groups,OU=TestOU,DC=whatever,DC=local
 ```
 
+Screenshot example. Showing TestGroupA and that an infinite loop is avoided.
+
+![alt tag](/Get-ADGroupMemberRecursive-screenshot-example.png)
+
 Example with nested groups. Play with Select-Object and Sort-Object -Unique, etc.
 
 ```powershell
