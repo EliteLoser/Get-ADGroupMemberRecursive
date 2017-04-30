@@ -11,7 +11,7 @@ function Get-ADGroupMemberRecursive {
         [String[]]
         [Alias("Properties")]
         $Property = @("DistinguishedName", "Name", "SamAccountName", "DisplayName"),
-        [Switch] $AsJSON)
+        [Switch] $AsJson)
     begin {
         Import-Module -Name ActiveDirectory -ErrorAction Stop -Verbose:$false
         $Groups = @{}
@@ -54,15 +54,13 @@ function Get-ADGroupMemberRecursive {
     }
     end {
         if ($AsJson) {
-            $Groups.GetEnumerator() | ForEach-Object {
-                $Group = $_.Name
-                $_.Value | Select-Object -Property @{ Name = "RootGroupDN"; Expression = { $GrandParentDN } }, *
+            $Groups.Values | ForEach-Object {
+                $_ | Select-Object -Property @{ Name = "RootGroupDN"; Expression = { $GrandParentDN } }, *
             } | ConvertTo-Json
         }
         else {
-            $Groups.GetEnumerator() | ForEach-Object {
-                $Group = $_.Name
-                $_.Value | Select-Object -Property @{ Name = "RootGroupDN"; Expression = { $GrandParentDN } }, *
+            $Groups.Values | ForEach-Object {
+                $_ | Select-Object -Property @{ Name = "RootGroupDN"; Expression = { $GrandParentDN } }, *
             }
         }
         ## DEBUG ##
