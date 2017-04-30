@@ -6,7 +6,7 @@ The code uses Microsoft's AD cmdlets.
 
 With multiple groups, you need to use something like $Groups | ForEach-Object { Get-ADGroupMemberRecursive $_ } | ...
 
-You can actually _pipe_ multiple groups to the function, but then you cannot trust the "RootGroupDN" as it will always be the last group you piped in, for all entries. All other info is accurate, though, for all the objects, such as "DirectParentGroupDN". I'll see if I can work around this. It seems a bit odd how I'm having to do it.
+You can actually _pipe_ multiple groups to the function (the -Identity parameter takes only a single group/string), but when doing that you cannot trust the "RootGroupDN" as it will always be set to the very last group you piped in, for all the entries. All other info is accurate, though, for all the objects, such as "DirectParentGroupDN". I'll see if I can work around this. It seems a bit odd how I'm having to do it.
 
 ```powershell
 PS C:\temp> Get-ADGroup 'TestGroupB' | Get-ADGroupMemberRecursive
