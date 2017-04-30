@@ -146,3 +146,41 @@ VERBOSE: [CN=testuser0002,OU=TestUsers,OU=TestOU,DC=whatever,DC=local] Adding no
 
 VERBOSE: Exporting main data hash to $Global:STGroupHashTemp.
 ```
+
+Example use.
+
+```
+PS C:\temp> $Result2 = Get-ADGroupMemberRecursive -Identity 'TestGroupA'
+
+PS C:\temp> $Result2.Count
+8
+
+PS C:\temp> $Result2.Name 
+testuser0001
+testuser0002
+testuser0300
+testuser0301
+testuser0100
+testuser0101
+testuser0200
+testuser0201
+
+PS C:\temp> $Result2.DirectParentGroupDN
+CN=TestGroupE,OU=Groups,OU=TestOU,DC=whatever,DC=local
+CN=TestGroupE,OU=Groups,OU=TestOU,DC=whatever,DC=local
+CN=TestGroupB,OU=Groups,OU=TestOU,DC=whatever,DC=local
+CN=TestGroupB,OU=Groups,OU=TestOU,DC=whatever,DC=local
+CN=TestGroupA,OU=Groups,OU=TestOU,DC=whatever,DC=local
+CN=TestGroupA,OU=Groups,OU=TestOU,DC=whatever,DC=local
+CN=TestGroupC,OU=Groups,OU=TestOU,DC=whatever,DC=local
+CN=TestGroupC,OU=Groups,OU=TestOU,DC=whatever,DC=local
+
+PS C:\temp> $Result2.DirectParentGroupDN | Sort-Object -Unique
+CN=TestGroupA,OU=Groups,OU=TestOU,DC=whatever,DC=local
+CN=TestGroupB,OU=Groups,OU=TestOU,DC=whatever,DC=local
+CN=TestGroupC,OU=Groups,OU=TestOU,DC=whatever,DC=local
+CN=TestGroupE,OU=Groups,OU=TestOU,DC=whatever,DC=local
+
+PS C:\temp> $Result2[0].RootGroupDN
+CN=TestGroupA,OU=Groups,OU=TestOU,DC=whatever,DC=local
+```
