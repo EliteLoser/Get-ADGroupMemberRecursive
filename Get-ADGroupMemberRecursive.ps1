@@ -10,8 +10,7 @@ function Get-ADGroupMemberRecursive {
         $Identity,
         [String[]]
         [Alias("Properties")]
-        $Property = @("DistinguishedName", "Name", "SamAccountName", "DisplayName"),
-        [Switch] $AsJson)
+        $Property = @("DistinguishedName", "Name", "SamAccountName", "DisplayName"))
     begin {
         Import-Module -Name ActiveDirectory -ErrorAction Stop -Verbose:$false
         $Groups = @{}
@@ -53,15 +52,8 @@ function Get-ADGroupMemberRecursive {
         Get-ADGroupMemberInternal -Identity $GrandParentDN
     }
     end {
-        if ($AsJson) {
-            $Groups.Values | ForEach-Object {
-                $_ | Select-Object -Property @{ Name = "RootGroupDN"; Expression = { $GrandParentDN } }, *
-            } | ConvertTo-Json
-        }
-        else {
-            $Groups.Values | ForEach-Object {
-                $_ | Select-Object -Property @{ Name = "RootGroupDN"; Expression = { $GrandParentDN } }, *
-            }
+        $Groups.Values | ForEach-Object {
+            $_ | Select-Object -Property @{ Name = "RootGroupDN"; Expression = { $GrandParentDN } }, *
         }
         ## DEBUG ##
         Write-Verbose -Message "Exporting main data hash to `$Global:STGroupHashTemp."
