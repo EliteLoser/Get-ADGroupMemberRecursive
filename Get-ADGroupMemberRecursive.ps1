@@ -18,7 +18,7 @@ function Get-ADGroupMemberRecursive {
             param(
                 [String] $Identity)
             # With Get-ADGroupMember there's a limit of 1000-5000 users by default. Worked around with this, supposedly.
-            foreach ($Member in @(Get-ADGroup -Identity $Identity -Propert Member | Select-Object -ExpandProperty Member | Get-ADObject)) {
+            foreach ($Member in @(Get-ADGroup -Identity $Identity -Propert Member | Select-Object -ExpandProperty Member | Get-ADObject -Propert $Property)) {
                 Write-Verbose -Message "[$($Member.DistinguishedName)] Processing ..."
                 if ($Member.ObjectClass -eq 'Group') {
                     if ($Groups.ContainsKey($Member.DistinguishedName)) {
