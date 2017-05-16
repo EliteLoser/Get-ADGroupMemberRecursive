@@ -1,4 +1,4 @@
-#requires -version 3
+#requires -version 2
 function Get-ADGroupMemberRecursive {
     [CmdletBinding()]
     param(
@@ -33,9 +33,6 @@ function Get-ADGroupMemberRecursive {
                 }
                 else {
                     Write-Verbose -Message "[$($Member.DistinguishedName)] Adding non-group element to $Identity array."
-                    # NB. That select-object below and the array concatenation of parameters is the only thing
-                    # that requires PSv3, so if you have v2, you can hardcode properties here and remove the "#requires -version 3"
-                    # at the top.
                     if ($Groups.ContainsKey($Identity)) {
                         $Groups[$Identity] += @($Member |
                             Add-Member -MemberType NoteProperty -Name DirectParentGroupDN -Value $Identity -PassThru -Force |
