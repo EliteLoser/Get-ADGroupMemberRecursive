@@ -33,7 +33,7 @@ function Get-ADGroupMemberRecursive {
                 }
                 else {
                     Write-Verbose -Message "[$($Member.DistinguishedName)] Adding non-group element to $Identity array."
-                    # NB. That select-object below and the array concatenation of parameters is the only thins
+                    # NB. That select-object below and the array concatenation of parameters is the only thing
                     # that requires PSv3, so if you have v2, you can hardcode properties here and remove the "#requires -version 3"
                     # at the top.
                     if ($Groups.ContainsKey($Identity)) {
