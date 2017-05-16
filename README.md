@@ -11,6 +11,18 @@ https://www.reddit.com/r/PowerShell/comments/68dlg1/love_reinventing_wheels_get_
 
 From at least Windows Server 2012 R2, the Get-ADGroupMember has a -Recursive parameter that does everything my code does, except for the "parent group DN" tagging. It's said it suffers from the group member limit that I've now worked around (ostensibly).
 
+To make the function compatible with PowerShell version 2, you just have to change one line; at the time of writing line 42:
+
+```powershell
+Select-Object -Property @(@($Property) + @("DirectParentGroupDN")))
+```
+
+The array concatenation of the properties there doesn't work in v2 for some reason. To use the default properties and make the entire function v2-compatible, remove line 1 and change line 42 (then 41) to the following (as these line numbers change I might not update the docs right away, so look for the line or perform an editor text search):
+
+```powershell
+Select-Object -Property "DistinguishedName", "Name", "SamAccountName", "DisplayName", "DirectParentGroupDN"
+```
+
 You can actually _pipe_ multiple groups to the function (the -Identity parameter takes only a single group/string), but when doing that you cannot trust the "RootGroupDN" as it will always be set to the very last group you piped in, for all the entries. All other info is accurate, though, for all the objects, such as "DirectParentGroupDN". I'll see if I can work around this. It seems a bit odd how I'm having to do it.
 
 ```
