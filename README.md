@@ -4,7 +4,10 @@ Not completely polished, but most of the basics are here.
 
 The code uses Microsoft's AD cmdlets and is compatible with PowerShell version 2; tested on Windows 7 SP1 with RSAT SP1.
 
-With multiple groups, you need to use something like $Groups | ForEach-Object { Get-ADGroupMemberRecursive $_ } | ...
+With multiple groups, you need to use something like
+```powershell
+$GroupResults = $Groups | ForEach-Object { Get-ADGroupMemberRecursive $_ } | ...
+```
 
 Some interesting information came up after I posted this on Reddit, among other things about limits on the number of users introduced in ADWS - you can read it here:
 https://www.reddit.com/r/PowerShell/comments/68dlg1/love_reinventing_wheels_get_ad_group_members/
