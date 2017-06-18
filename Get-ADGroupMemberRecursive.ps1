@@ -6,19 +6,26 @@ function Get-ADGroupMemberRecursive {
             ValueFromPipelineByPropertyName = $true,
             Mandatory = $true)]
         [Alias("DistinguishedName", "Name", "SamAccountName")]
-        [String]
-        $Identity,
-        [String[]]
+            [String] $Identity,
         [Alias("Properties")]
-        $Property = @("DistinguishedName", "Name", "SamAccountName", "DisplayName"))
+            [String[]] $Property = @("DistinguishedName", "Name", "SamAccountName", "DisplayName"),
+        $Credential = [System.Management.Automation.PSCredential]::Empty)
     begin {
         Import-Module -Name ActiveDirectory -ErrorAction Stop -Verbose:$false
+        if ($Credential.Username -match '\S') {
+            $CredentialSplat = @{
+                Credential = $Credential
+            }
+        }
+        else {
+            $CredentialSplat = @{}
+        }
         $Groups = @{}
         function Get-ADGroupMemberInternal {
             param(
                 [String] $Identity)
             # With Get-ADGroupMember there's a limit of 1000-5000 users by default. Worked around with this, supposedly.
-            foreach ($Member in @(Get-ADGroup -Identity $Identity -Propert Member | Select-Object -ExpandProperty Member | Get-ADObject -Propert $Property)) {
+            foreach ($Member in @(Get-ADGroup -Identity $Identity -Propert Member @CredentialSplat | Select-Object -ExpandProperty Member | Get-ADObject -Propert $Property @CredentialSplat)) {
                 Write-Verbose -Message "[$($Member.DistinguishedName)] Processing ..."
                 if ($Member.ObjectClass -eq 'Group') {
                     if ($Groups.ContainsKey($Member.DistinguishedName)) {
@@ -44,10 +51,10 @@ function Get-ADGroupMemberRecursive {
     }
     process {
         if (Get-Variable -Name Identity -ErrorAction SilentlyContinue) {
-            $GrandParentDN = (Get-ADGroup $Identity -ErrorAction SilentlyContinue).DistinguishedName
+            $GrandParentDN = (Get-ADGroup $Identity -ErrorAction SilentlyContinue @CredentialSplat).DistinguishedName
         }
         elseif ($_) {
-            $GrandParentDN = (Get-ADGroup $_ -ErrorAction SilentlyContinue).DistinguishedName
+            $GrandParentDN = (Get-ADGroup $_ -ErrorAction SilentlyContinue @CredentialSplat).DistinguishedName
         }
         $Groups[$GrandParentDN] = @()
         Get-ADGroupMemberInternal -Identity $GrandParentDN
