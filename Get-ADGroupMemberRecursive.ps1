@@ -9,7 +9,8 @@ function Get-ADGroupMemberRecursive {
             [String] $Identity,
         [Alias("Properties")]
             [String[]] $Property = @("DistinguishedName", "Name", "SamAccountName", "DisplayName"),
-        $Credential = [System.Management.Automation.PSCredential]::Empty)
+        $Credential = [System.Management.Automation.PSCredential]::Empty,
+        [Switch] $TranslateForeignSecurityPrincipals)
     begin {
         Import-Module -Name ActiveDirectory -ErrorAction Stop -Verbose:$false
         if ($Credential.Username -match '\S') {
@@ -25,7 +26,9 @@ function Get-ADGroupMemberRecursive {
             param(
                 [String] $Identity)
             # With Get-ADGroupMember there's a limit of 1000-5000 users by default. Worked around with this, supposedly.
-            foreach ($Member in @(Get-ADGroup -Identity $Identity -Propert Member @CredentialSplat | Select-Object -ExpandProperty Member | Get-ADObject -Propert $Property @CredentialSplat)) {
+            foreach ($Member in @(Get-ADGroup -Identity $Identity -Propert Member @CredentialSplat | 
+              Select-Object -ExpandProperty Member | 
+              Get-ADObject -Propert $Property @CredentialSplat)) {
                 Write-Verbose -Message "[$($Member.DistinguishedName)] Processing ..."
                 if ($Member.ObjectClass -eq 'Group') {
                     if ($Groups.ContainsKey($Member.DistinguishedName)) {
@@ -60,11 +63,33 @@ function Get-ADGroupMemberRecursive {
         Get-ADGroupMemberInternal -Identity $GrandParentDN
     }
     end {
-        $Groups.Values | ForEach-Object {
-            $_ | Select-Object -Property *, @{ Name = "RootGroupDN"; Expression = { $GrandParentDN } }
+        $Groups.Values | ForEach-Object { # workaround
+            if ($TranslateForeignSecurityPrincipals) {
+                if ($_.DistinguishedName -like "*,CN=ForeignSecurityPrincipals,DC=*") {
+                    $MyEAP = $ErrorActionPreference
+                    $ErrorActionPreference = "SilentlyContinue"
+                    $SamAccountNameForFSP = (New-Object -TypeName System.Security.Principal.SecurityIdentifier `
+                        -ArgumentList $_.Name).Translate([System.Security.Principal.NTAccount]).Value
+                    $ErrorActionPreference = $MyEAP
+                    Add-Member -InputObject $_ -MemberType NoteProperty -Name RootGroupDN -Value $GrandParentDN
+                    Add-Member -InputObject $_ -MemberType NoteProperty -Name IsForeignSecurityPrincipal -Value $True
+                    Add-Member -InputObject $_ -MemberType NoteProperty -Name SamAccountName -Value $SamAccountNameForFSP -Force
+                    Add-Member -InputObject $_ -MemberType NoteProperty -Name Name -Value $SamAccountNameForFSP.Split("\")[-1] -Force -PassThru
+                }
+                else {
+                    $_ | Select-Object -Property *,
+                        @{ Name = "RootGroupDN"; Expression = { $GrandParentDN } },
+                        @{ Name = "IsForeignSecurityPrincipal"; Expression = { $False } }
+                }
+            }
+            else {
+                $_ | Select-Object -Property *,
+                    @{ Name = "RootGroupDN"; Expression = { $GrandParentDN } },
+                    @{ Name = "IsForeignSecurityPrincipal"; Expression = { $Null } } # hm.. three states ;/
+            }
         }
         ## DEBUG ##
-        Write-Verbose -Message "Exporting main data hash to `$Global:STGroupHashTemp."
-        $Global:STGroupHashTemp = $Groups
+        #Write-Verbose -Message "Exporting main data hash to `$Global:STGroupHashTemp."
+        #$Global:STGroupHashTemp = $Groups
     }
 }
