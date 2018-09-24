@@ -67,14 +67,19 @@ function Get-ADGroupMemberRecursive {
             if ($TranslateForeignSecurityPrincipals) {
                 if ($_.DistinguishedName -like "*,CN=ForeignSecurityPrincipals,DC=*") {
                     $MyEAP = $ErrorActionPreference
-                    $ErrorActionPreference = "SilentlyContinue"
-                    $SamAccountNameForFSP = (New-Object -TypeName System.Security.Principal.SecurityIdentifier `
-                        -ArgumentList $_.Name).Translate([System.Security.Principal.NTAccount]).Value
+                    $ErrorActionPreference = "Stop"
+                    try {
+                        $SamAccountNameForFSP = (New-Object -TypeName System.Security.Principal.SecurityIdentifier `
+                            -ArgumentList $_.Name).Translate([System.Security.Principal.NTAccount]).Value
+                    }
+                    catch {
+                        $SamAccounNameForFSP = ""
+                    }
                     $ErrorActionPreference = $MyEAP
                     Add-Member -InputObject $_ -MemberType NoteProperty -Name RootGroupDN -Value $GrandParentDN
-                    Add-Member -InputObject $_ -MemberType NoteProperty -Name IsForeignSecurityPrincipal -Value $True
                     Add-Member -InputObject $_ -MemberType NoteProperty -Name SamAccountName -Value $SamAccountNameForFSP -Force
-                    Add-Member -InputObject $_ -MemberType NoteProperty -Name Name -Value $SamAccountNameForFSP.Split("\")[-1] -Force -PassThru
+                    Add-Member -InputObject $_ -MemberType NoteProperty -Name Name -Value ($SamAccountNameForFSP -split "\\")[-1] -Force
+                    $_ | Select-Object -Property *, @{ Name = "IsForeignSecurityPrincipal"; Expression = { $True } }
                 }
                 else {
                     $_ | Select-Object -Property *,
