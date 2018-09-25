@@ -63,23 +63,27 @@ function Get-ADGroupMemberRecursive {
         Get-ADGroupMemberInternal -Identity $GrandParentDN
     }
     end {
-        $Groups.Values | ForEach-Object { # workaround
+        $Groups.Values | ForEach-Object { $_ } | ForEach-Object { # flatten as a workaround
             if ($TranslateForeignSecurityPrincipals) {
                 if ($_.DistinguishedName -like "*,CN=ForeignSecurityPrincipals,DC=*") {
+                    # Use a temporary object because of apparent scoping issues.
+                    # Also logically isolates parts..
+                    $TempObject = $_ | ConvertTo-Csv | ConvertFrom-Csv # create a deep copy
                     $MyEAP = $ErrorActionPreference
                     $ErrorActionPreference = "Stop"
                     try {
                         $SamAccountNameForFSP = (New-Object -TypeName System.Security.Principal.SecurityIdentifier `
-                            -ArgumentList $_.Name).Translate([System.Security.Principal.NTAccount]).Value
+                            -ArgumentList $TempObject.Name).Translate([System.Security.Principal.NTAccount]).Value
                     }
                     catch {
-                        $SamAccounNameForFSP = ""
+                        $SamAccountNameForFSP = ""
                     }
                     $ErrorActionPreference = $MyEAP
-                    Add-Member -InputObject $_ -MemberType NoteProperty -Name RootGroupDN -Value $GrandParentDN
-                    Add-Member -InputObject $_ -MemberType NoteProperty -Name SamAccountName -Value $SamAccountNameForFSP -Force
-                    Add-Member -InputObject $_ -MemberType NoteProperty -Name Name -Value ($SamAccountNameForFSP -split "\\")[-1] -Force
-                    $_ | Select-Object -Property *, @{ Name = "IsForeignSecurityPrincipal"; Expression = { $True } }
+                    Add-Member -InputObject $TempObject -MemberType NoteProperty -Name RootGroupDN -Value $GrandParentDN
+                    Add-Member -InputObject $TempObject -MemberType NoteProperty -Name SamAccountName -Value $SamAccountNameForFSP -Force
+                    Add-Member -InputObject $TempObject -MemberType NoteProperty -Name Name `
+                        -Value ($SamAccountNameForFSP -split "\\")[-1] -Force
+                    $TempObject | Select-Object -Property *, @{ Name = "IsForeignSecurityPrincipal"; Expression = { $True } }
                 }
                 else {
                     $_ | Select-Object -Property *,
@@ -97,4 +101,4 @@ function Get-ADGroupMemberRecursive {
         #Write-Verbose -Message "Exporting main data hash to `$Global:STGroupHashTemp."
         #$Global:STGroupHashTemp = $Groups
     }
-}
+} 
